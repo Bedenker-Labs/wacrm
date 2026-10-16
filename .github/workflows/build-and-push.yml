@@ -57,6 +57,7 @@ jobs:
             NEXT_PUBLIC_SUPABASE_URL=https://supabase.bedenkerlabs.com
             NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzkxNDU5NDU2LCJleHAiOjE5NDkxMzk0NTZ9.xYtAAUz1CNQjXxZ2z3G5Ob7bbs8tgyKTj2cbQNFnya4
             NEXT_PUBLIC_SITE_URL=https://wacrm.bedenkerlabs.com
+            NEXT_PUBLIC_APP_LOCALE=es
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: type=gha,scope=app
           cache-to: type=gha,mode=max,scope=app
