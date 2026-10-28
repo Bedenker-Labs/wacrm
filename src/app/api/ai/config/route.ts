@@ -190,6 +190,7 @@ export async function POST(request: Request) {
           autoReplyEnabled,
           autoReplyMaxPerConversation: maxPer,
           handoffAgentId: null,
+          handoffAutomationId: null,
           embeddingsApiKey: null,
         })
       } catch (err) {

@@ -27,6 +27,12 @@ export interface AiConfig {
    *  agent's `auth.users.id`, or null to leave it unassigned (drop into
    *  the shared queue). */
   handoffAgentId: string | null
+  /** When set, auto-reply also kicks off this `automations` row's step
+   *  chain for the contact as soon as it hands off -- a keyword/button
+   *  flow the customer gets immediately instead of waiting in silence
+   *  for the human handoffAgentId routes to. Runs in addition to, not
+   *  instead of, the human handoff. Null means no fallback automation. */
+  handoffAutomationId: string | null
   /** Optional OpenAI-compatible key for embeddings. When set, the
    *  knowledge base is embedded and semantic retrieval turns on; when
    *  null, retrieval falls back to lexical full-text search. */

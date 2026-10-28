@@ -35,6 +35,11 @@ export const TRIGGER_META: Record<AutomationTriggerType, TriggerMeta> = {
   interactive_reply: {
     pillClass: 'border-pink-500/30 bg-pink-500/10 text-pink-300',
   },
+  // Never shown in the builder's trigger picker -- only appears on an
+  // automation_logs row created via the AI handoff bypass.
+  ai_handoff: {
+    pillClass: 'border-slate-500/30 bg-slate-500/10 text-muted-foreground',
+  },
 }
 
 export function isKnownTrigger(t: string): t is AutomationTriggerType {

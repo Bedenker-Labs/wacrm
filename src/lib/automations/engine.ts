@@ -338,6 +338,49 @@ interface PendingRow {
   context: AutomationContext | null
 }
 
+/**
+ * Runs one specific automation's step chain for a contact right now,
+ * bypassing `is_active` and trigger matching entirely -- used by the AI
+ * assistant's handoff fallback (see dispatchInboundToAiReply), which
+ * already knows exactly which automation to run (ai_configs.
+ * handoff_automation_id) and isn't reacting to a trigger event at all.
+ *
+ * Still scopes the automation lookup to `input.accountId`, so a
+ * misconfigured or cross-account id can't run another tenant's
+ * automation. Never throws -- same fire-and-forget contract as
+ * runAutomationsForTrigger.
+ */
+export async function runAutomationForContact(
+  automationId: string,
+  input: DispatchInput,
+): Promise<void> {
+  try {
+    const db = supabaseAdmin()
+    const { data: automation, error } = await db
+      .from('automations')
+      .select('*')
+      .eq('id', automationId)
+      .eq('account_id', input.accountId)
+      .maybeSingle()
+
+    if (error) {
+      console.error('[automations] runAutomationForContact: fetch failed:', error)
+      return
+    }
+    if (!automation) {
+      console.warn(
+        '[automations] runAutomationForContact: automation not found for this account',
+        automationId,
+      )
+      return
+    }
+
+    await executeAutomation(automation as Automation, input)
+  } catch (err) {
+    console.error('[automations] runAutomationForContact failed:', err)
+  }
+}
+
 // ------------------------------------------------------------
 // Internal execution
 // ------------------------------------------------------------

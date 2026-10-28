@@ -13,6 +13,7 @@ import {
 } from '@/lib/flows/meta-send'
 import { sendTypingIndicator } from '@/lib/whatsapp/meta-api'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { runAutomationForContact } from '@/lib/automations/engine'
 
 interface DispatchArgs {
   /** Tenancy key — drives config, contact, and whatsapp_config lookups. */
@@ -178,6 +179,23 @@ export async function dispatchInboundToAiReply(
         update.assigned_agent_id = config.handoffAgentId
       }
       await db.from('conversations').update(update).eq('id', conversationId)
+
+      // Fallback: in addition to (not instead of) the human routing
+      // above, immediately hand the customer an existing automation's
+      // menu flow (e.g. the old keyword/button-driven financing flow)
+      // instead of leaving them in silence until a human picks up.
+      // Fire-and-forget, same as the webhook's own automation dispatch.
+      if (config.handoffAutomationId) {
+        void runAutomationForContact(config.handoffAutomationId, {
+          accountId,
+          triggerType: 'ai_handoff',
+          contactId,
+          context: {
+            conversation_id: conversationId,
+            message_text: latestUserMessage(messages),
+          },
+        })
+      }
       return
     }
 

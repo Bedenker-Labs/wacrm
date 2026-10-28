@@ -484,7 +484,14 @@ export type AutomationTriggerType =
   | 'time_based'
   /** Customer tapped a reply button / list row whose id matches; lets
    *  multi-step menus be chained across automations. */
-  | 'interactive_reply';
+  | 'interactive_reply'
+  /** Not user-selectable in the builder (see automation-builder.tsx's
+   *  own curated trigger list) -- only used internally as the
+   *  automation_logs.trigger_event value when the AI assistant hands a
+   *  conversation off to a specific automation's step chain directly
+   *  (ai_configs.handoff_automation_id), bypassing normal trigger
+   *  matching. The automation's own stored trigger_type is untouched. */
+  | 'ai_handoff';
 
 export type AutomationStepType =
   | 'send_message'
