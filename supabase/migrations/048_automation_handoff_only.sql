@@ -1,0 +1,32 @@
+-- ============================================================
+-- 048_automation_handoff_only.sql — handoff-only automations
+--
+-- Bug found testing 047: the AI-handoff fallback (ai_configs.
+-- handoff_automation_id) invokes a specific automation's step chain
+-- directly via runAutomationForContact, bypassing is_active entirely
+-- for that FIRST call -- so the referenced automation (e.g. "Saludo
+-- personalizado") was deliberately kept is_active=false, the same
+-- state it's had since the Zaca automations-vs-AI conflict was fixed.
+--
+-- That automation's flow parks waiting for a button reply
+-- (automation_pending_executions, status='awaiting_reply') after
+-- sending its menu. resumeAwaitingReply (engine.ts) re-checks
+-- is_active=true before resuming a parked wait -- it treats
+-- is_active=false as "paused/deleted while waiting", marks the wait
+-- 'expired', and gives up without responding. Net result: the
+-- customer gets the menu, taps a button, and then silence -- worse
+-- than before 047.
+--
+-- Fix: automations.handoff_only. Set it true (alongside is_active=true)
+-- on an automation that should ONLY ever run via the handoff bypass or
+-- by resuming an already-parked wait -- never on its own from a fresh
+-- inbound message. runAutomationsForTrigger's normal dispatch query
+-- and the AI's "an automation already handles this, stand down" check
+-- both exclude handoff_only=true rows; resumeAwaitingReply doesn't
+-- need to change, since is_active is now true for these rows.
+--
+-- Idempotent — safe to run multiple times.
+-- ============================================================
+
+ALTER TABLE automations
+  ADD COLUMN IF NOT EXISTS handoff_only boolean NOT NULL DEFAULT false;

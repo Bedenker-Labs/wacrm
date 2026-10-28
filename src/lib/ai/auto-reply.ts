@@ -73,11 +73,17 @@ export async function dispatchInboundToAiReply(
     // avoid double-texting the customer. (Relationship triggers like
     // `first_inbound_message` don't count — they're not per-message
     // auto-responders.)
+    // handoff_only automations are excluded here on purpose: they stay
+    // is_active=true solely so a parked step-wait can resume (see
+    // migration 048), never to compete with the AI on a fresh message --
+    // without this they'd make the AI stand down for every inbound,
+    // including the handoff message that's supposed to invoke them.
     const { data: autoResponders } = await db
       .from('automations')
       .select('id')
       .eq('account_id', accountId)
       .eq('is_active', true)
+      .eq('handoff_only', false)
       .in('trigger_type', ['new_message_received', 'keyword_match'])
       .limit(1)
     if (autoResponders && autoResponders.length > 0) return

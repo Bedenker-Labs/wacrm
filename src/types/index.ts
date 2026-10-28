@@ -656,6 +656,14 @@ export interface Automation {
   trigger_type: AutomationTriggerType;
   trigger_config: AutomationTriggerConfig;
   is_active: boolean;
+  /** True for an automation that only ever runs via the AI handoff
+   *  bypass (ai_configs.handoff_automation_id / runAutomationForContact)
+   *  -- excluded from runAutomationsForTrigger's normal dispatch and
+   *  from the AI's "stand down, an automation already answers this"
+   *  check, even while is_active stays true so a parked step-chain
+   *  wait can still be resumed normally (resumeAwaitingReply requires
+   *  is_active=true). See migration 048. */
+  handoff_only: boolean;
   execution_count: number;
   last_executed_at?: string | null;
   created_at: string;

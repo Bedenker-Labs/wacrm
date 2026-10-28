@@ -128,6 +128,10 @@ export async function runAutomationsForTrigger(input: DispatchInput): Promise<vo
       .eq('account_id', input.accountId)
       .eq('trigger_type', input.triggerType)
       .eq('is_active', true)
+      // handoff_only automations stay is_active=true purely so a parked
+      // step-wait can be resumed (resumeAwaitingReply requires it) --
+      // they must never start fresh from a normal trigger match.
+      .eq('handoff_only', false)
 
     if (error) {
       console.error('[automations] fetch failed:', error)
